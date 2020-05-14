@@ -40,7 +40,34 @@ public class FileTool {
         srcFile.renameTo(destFile);
     }
 
-    public static void deleteAllFiles(File file) {
+    public static void deleteAll(File filePath) {
+        if (!filePath.exists())
+            return;
+        if (filePath.isFile()) {
+            filePath.delete();
+            return;
+        }
+        File[] files = filePath.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            deleteAll(files[i]);
+        }
+        filePath.delete();
+    }
+
+    public static void deleteAllDirectory(File filePath) {
+        if (!filePath.exists())
+            return;
+        if (filePath.isFile()) {
+            return;
+        }
+        File[] files = filePath.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            deleteAllDirectory(files[i]);
+        }
+        filePath.delete();
+    }
+
+    public static void deleteAllFile(File file) {
         if (!file.exists())
             return;
         if (file.isFile()) {
@@ -49,8 +76,7 @@ public class FileTool {
         }
         File[] files = file.listFiles();
         for (int i = 0; i < files.length; i++) {
-            deleteAllFiles(files[i]);
+            deleteAllFile(files[i]);
         }
-        file.delete();
     }
 }

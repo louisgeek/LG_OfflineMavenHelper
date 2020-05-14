@@ -1,13 +1,21 @@
 package com.louisgeek.javaweb;
 
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.dom4j.dom.DOMElement;
 import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * AAR/JAR 包生成 SHA1/MD5、POM 等文件
@@ -59,14 +67,20 @@ public class OfflineMavenHelper {
             //D:\lib\com\github\louisgeek\xwalk_core_library
             File ARTIFACT_ID_File = new File(libFileDir + File.separator + GROUP_ID_Arr[0] + File.separator + GROUP_ID_Arr[1] + File.separator + GROUP_ID_Arr[2], ARTIFACT_ID);
             if (ARTIFACT_ID_File.exists()) {
-                FileTool.deleteAllFiles(ARTIFACT_ID_File);
+//                FileTool.deleteAll(ARTIFACT_ID_File);
+                FileTool.deleteAllDirectory(ARTIFACT_ID_File);
             }
             //
             ARTIFACT_ID_File.mkdirs();
             //
             try {
                 //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml
-                File metadataFile = createXML_maven_metadata(ARTIFACT_ID_File.getAbsolutePath(), GROUP_ID, ARTIFACT_ID, VERSION);
+                File metadataFile = new File(ARTIFACT_ID_File.getAbsolutePath(), "maven-metadata.xml");
+                if (!metadataFile.exists()) {
+                    metadataFile = createXML_maven_metadata(metadataFile, GROUP_ID, ARTIFACT_ID, VERSION);
+                } else {
+                    updateXML_maven_metadata(metadataFile, VERSION);
+                }
                 //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml.md5
                 saveTextToFile(metadataFile.getAbsolutePath() + ".md5", getCheckSum(metadataFile, "MD5"));
                 //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml.sha1
@@ -118,8 +132,7 @@ public class OfflineMavenHelper {
         }
     }
 
-    public static File createXML_maven_metadata(String filePath, String groupId, String artifactId, String version) throws Exception {
-        File file;
+    public static File createXML_maven_metadata(File file, String groupId, String artifactId, String version) throws Exception {
 //得到Document对象
         Document document = DocumentHelper.createDocument();
 //创建根节点
@@ -133,14 +146,15 @@ public class OfflineMavenHelper {
 //设置子元素的属性
 //        versioningElement.addAttribute("perid", String.valueOf(per.getPerid()));
 //创建子子元素
-        Element release_versioningElement = versioningElement.addElement("release");
+        Element releaseElement = versioningElement.addElement("release");
         //设置文本数据
-        release_versioningElement.setText(version);
-        Element versions_versioningElement = versioningElement.addElement("versions");
-        Element versionElement = versions_versioningElement.addElement("version");
+        releaseElement.setText(version);
+        Element versionsElement = versioningElement.addElement("versions");
+        Element versionElement = versionsElement.addElement("version");
         versionElement.setText(version);
-        Element lastUpdated_versioningElement = versioningElement.addElement("lastUpdated");
-        lastUpdated_versioningElement.setText("20191214080942");
+        Element lastUpdatedElement = versioningElement.addElement("lastUpdated");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
+        lastUpdatedElement.setText(simpleDateFormat.format(new Date()));
 //
 //设置生成xml的格式
         OutputFormat format = OutputFormat.createPrettyPrint();
@@ -149,7 +163,53 @@ public class OfflineMavenHelper {
         //声明后面起新行
         format.setNewLineAfterDeclaration(false);
         //创建XML字符输出流
-        file = new File(filePath, "maven_metadata.xml");
+        XMLWriter writer = new XMLWriter(new FileOutputStream(file), format);
+        //设置是否转义，默认使用转义字符
+        writer.setEscapeText(false);
+        //写出Document对象
+        writer.write(document);
+        //关闭流
+        writer.close();
+        //
+        return file;
+    }
+
+
+    public static File updateXML_maven_metadata(File file, String version) throws Exception {
+//得到Document对象
+        SAXReader saxReader = SAXReader.createDefault();
+        Document document = saxReader.read(file);
+//        Document document = DocumentHelper.parseText("textXml");
+        Element rootElement = document.getRootElement();
+        Element versioningElement = rootElement.element("versioning");
+        Element releaseElement = versioningElement.element("release");
+        //创建子元素
+        releaseElement.setText(version);
+        Element versionsElement = versioningElement.element("versions");
+        List<Element> versionElementList = versionsElement.elements("version");
+        boolean exist = false;
+        for (Element versionElement : versionElementList) {
+            if (version.equals(versionElement.getText())) {
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            Element versionElement = versionsElement.addElement("version");
+            versionElement.setText(version);
+            //
+            Element lastUpdatedElement = versioningElement.element("lastUpdated");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
+            lastUpdatedElement.setText(simpleDateFormat.format(new Date()));
+        }
+//
+//设置生成xml的格式
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        // 设置编码格式
+        format.setEncoding("UTF-8");
+        //声明后面起新行
+        format.setNewLineAfterDeclaration(false);
+        //创建XML字符输出流
         XMLWriter writer = new XMLWriter(new FileOutputStream(file), format);
         //设置是否转义，默认使用转义字符
         writer.setEscapeText(false);

@@ -28,7 +28,7 @@ public class OfflineMavenHelper {
     public static final String GROUP_ID = "com.github.louisgeek";
     public static final String FILE_PATH = "D:\\lib";
 
-    //D:\lib\xwalk_core_library-23.53.589.4.aar
+    //D:\lib\jar_aar_library-1.0.1.aar
     public static void main(String[] args) {
         //先通过Jar的SHA1查询 如果不存在则解析Manifest查询
         //D:\lib
@@ -64,7 +64,7 @@ public class OfflineMavenHelper {
             String VERSION = onlyName.substring(onlyName.lastIndexOf("-") + 1);
             System.out.println("--ARTIFACT_ID  " + ARTIFACT_ID + " --");
             System.out.println("--VERSION  " + VERSION + " --");
-            //D:\lib\com\github\louisgeek\xwalk_core_library
+            //D:\lib\com\github\louisgeek\jar_aar_library
             File ARTIFACT_ID_File = new File(libFileDir + File.separator + GROUP_ID_Arr[0] + File.separator + GROUP_ID_Arr[1] + File.separator + GROUP_ID_Arr[2], ARTIFACT_ID);
             if (ARTIFACT_ID_File.exists()) {
 //                FileTool.deleteAll(ARTIFACT_ID_File);
@@ -74,35 +74,35 @@ public class OfflineMavenHelper {
             ARTIFACT_ID_File.mkdirs();
             //
             try {
-                //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml
+                //D:\lib\com\github\louisgeek\jar_aar_library\maven-metadata.xml
                 File metadataFile = new File(ARTIFACT_ID_File.getAbsolutePath(), "maven-metadata.xml");
                 if (!metadataFile.exists()) {
                     metadataFile = createXML_maven_metadata(metadataFile, GROUP_ID, ARTIFACT_ID, VERSION);
                 } else {
                     updateXML_maven_metadata(metadataFile, VERSION);
                 }
-                //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml.md5
+                //D:\lib\com\github\louisgeek\jar_aar_library\maven-metadata.xml.md5
                 saveTextToFile(metadataFile.getAbsolutePath() + ".md5", getCheckSum(metadataFile, "MD5"));
-                //D:\lib\com\github\louisgeek\xwalk_core_library\maven-metadata.xml.sha1
+                //D:\lib\com\github\louisgeek\jar_aar_library\maven-metadata.xml.sha1
                 saveTextToFile(metadataFile.getAbsolutePath() + ".sha1", getCheckSum(metadataFile, "SHA1"));
 
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1
                 File VERSION_FilePath = new File(ARTIFACT_ID_File, VERSION);
                 VERSION_FilePath.mkdirs();
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.aar
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.aar
                 File libFile = new File(VERSION_FilePath, libName);
                 FileTool.copyFile(file, libFile);
 //                FileTool.moveFile(file, VERSION_FilePath.getAbsolutePath());
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.aar.md5
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.aar.md5
                 saveTextToFile(libFile.getAbsolutePath() + ".md5", getCheckSum(libFile, "MD5"));
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.aar.md5.sha1
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.aar.md5.sha1
                 saveTextToFile(libFile.getAbsolutePath() + ".sha1", getCheckSum(libFile, "SHA1"));
                 //
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.pom
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.pom
                 File pomFile = createXML_pom(VERSION_FilePath.getAbsolutePath(), GROUP_ID, ARTIFACT_ID, VERSION, ext);
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.pom.md5
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.pom.md5
                 saveTextToFile(pomFile.getAbsolutePath() + ".md5", getCheckSum(pomFile, "MD5"));
-                //D:\lib\com\github\louisgeek\xwalk_core_library\23.53.589.4\xwalk_core_library-23.53.589.4.pom.sha1
+                //D:\lib\com\github\louisgeek\jar_aar_library\1.0.1\jar_aar_library-1.0.1.pom.sha1
                 saveTextToFile(pomFile.getAbsolutePath() + ".sha1", getCheckSum(pomFile, "SHA1"));
 
             } catch (Exception e) {
